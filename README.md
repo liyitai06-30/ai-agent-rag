@@ -25,4 +25,6 @@
 ## 已知局限
 
 （待补：至少写 3 条。诚实的局限比吹嘘更加分）
-liyitai06-30
+---
+
+作者：[liyitai06-30](https://github.com/liyitai06-30)
