@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+.pytest_cache/
+evidenceqa.db
+demo.db
+.DS_Store

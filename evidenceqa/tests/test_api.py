@@ -1,0 +1,132 @@
+from pathlib import Path
+
+from fastapi.testclient import TestClient
+
+from app.database import init_db
+from app.main import app
+
+
+def make_client(tmp_path: Path) -> TestClient:
+    app.state.db_path = tmp_path / "test.db"
+    init_db(app.state.db_path)
+    return TestClient(app)
+
+
+def test_health_check(tmp_path: Path) -> None:
+    client = make_client(tmp_path)
+
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok", "service": "evidenceqa-api"}
+
+
+def test_upload_normalizes_and_chunks_documents(tmp_path: Path) -> None:
+    client = make_client(tmp_path)
+    content = "\n\n".join(
+        f"Section {index}: " + "A" * 120 for index in range(6)
+    ).encode()
+
+    upload_response = client.post(
+        "/documents/upload",
+        files={"file": ("security-policy.md", content, "text/markdown")},
+    )
+    list_response = client.get("/documents")
+    document_id = upload_response.json()["id"]
+    chunks_response = client.get(f"/documents/{document_id}/chunks")
+
+    assert upload_response.status_code == 201
+    assert upload_response.json()["title"] == "security-policy"
+    assert upload_response.json()["chunk_count"] >= 2
+    assert list_response.status_code == 200
+    assert len(list_response.json()) == 1
+    assert chunks_response.status_code == 200
+    assert chunks_response.json()[0]["char_start"] == 0
+    assert chunks_response.json()[0]["content"].startswith("Section 0")
+
+
+def test_document_metadata_and_deletion(tmp_path: Path) -> None:
+    client = make_client(tmp_path)
+    document = client.post(
+        "/documents/upload",
+        files={"file": ("handbook.txt", b"Engineering handbook", "text/plain")},
+    ).json()
+
+    get_response = client.get(f"/documents/{document['id']}")
+    delete_response = client.delete(f"/documents/{document['id']}")
+
+    assert get_response.status_code == 200
+    assert get_response.json()["source_name"] == "handbook.txt"
+    assert delete_response.status_code == 204
+
+
+def test_reject_unsupported_document_type(tmp_path: Path) -> None:
+    client = make_client(tmp_path)
+
+    response = client.post(
+        "/documents/upload",
+        files={"file": ("report.pdf", b"not a real PDF", "application/pdf")},
+    )
+
+    assert response.status_code == 415
+
+
+def test_search_ranks_relevant_chunk_first(tmp_path: Path) -> None:
+    client = make_client(tmp_path)
+    expense_doc = client.post(
+        "/documents/upload",
+        files={"file": ("expense.md", "差旅报销需要部门主管提前审批，发票必须在三十天内提交。".encode(), "text/markdown")},
+    ).json()
+    client.post(
+        "/documents/upload",
+        files={"file": ("wifi.md", "Office wifi passwords rotate monthly. Contact IT to reset access.".encode(), "text/markdown")},
+    )
+
+    response = client.get("/search", params={"q": "报销审批流程", "top_k": 3})
+
+    assert response.status_code == 200
+    hits = response.json()
+    assert hits
+    assert hits[0]["document_id"] == expense_doc["id"]
+    assert hits[0]["title"] == "expense"
+    assert hits[0]["score"] >= hits[-1]["score"]
+
+
+def test_ask_returns_answer_with_sources(tmp_path: Path) -> None:
+    client = make_client(tmp_path)
+    client.post(
+        "/documents/upload",
+        files={"file": ("policy.md", "远程办公需要提前一周向主管申请并填写审批表。".encode(), "text/markdown")},
+    )
+
+    response = client.post("/ask", json={"question": "远程办公的审批流程是什么", "top_k": 3})
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "answer" in data
+    assert len(data["answer"]) > 0
+    assert "sources" in data
+    assert len(data["sources"]) > 0
+    assert "policy" in data["sources"][0]["title"]
+
+
+def test_eval_endpoint_reports_metrics(tmp_path: Path) -> None:
+    client = make_client(tmp_path)
+    client.post(
+        "/documents/upload",
+        files={"file": ("policy.md", "远程办公需提前一周申请。差旅报销发票三十天内提交。".encode(), "text/markdown")},
+    )
+
+    queries = [
+        {"question": "远程办公申请流程", "relevant_document_title": "policy"},
+        {"question": "报销提交期限", "relevant_document_title": "policy"},
+    ]
+    response = client.post(f"/eval/retrieval?k=3", json=queries)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total_queries"] == 2
+    assert data["recall_at_k"] >= 0.5
+    assert data["mrr"] >= 0.5
+    assert data["avg_latency_ms"] > 0
+    assert len(data["details"]) == 2
