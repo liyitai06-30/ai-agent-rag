@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from app.auth import load_api_key, require_api_key
 from app.chunking import chunk_text, normalize_text
 from app.database import DB_PATH, init_db
-from app.embeddings import HashingEmbedder
+from app.embeddings import get_embedder
 from app.repository import (
     backfill_chunk_embeddings,
     create_document,
@@ -52,7 +52,7 @@ app = FastAPI(
 )
 app.state.db_path = DB_PATH
 app.state.api_key = load_api_key()
-embedder = HashingEmbedder()
+embedder = get_embedder()
 answer_provider = get_answer_provider()
 
 

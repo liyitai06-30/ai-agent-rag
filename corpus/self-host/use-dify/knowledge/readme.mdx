@@ -1,0 +1,63 @@
+---
+title: 知识库
+sidebarTitle: 概述
+---
+
+> 本文档由 AI 自动翻译。如有任何不准确之处，请参考 [英文原版](/en/self-host/use-dify/knowledge/readme)。
+
+## 简介
+
+在 Dify 中，你可以将自有数据作为「知识」集成到 AI 应用中。通过为大语言模型（LLM）提供特定领域的上下文信息，知识能够让 LLM 的回复更加准确、相关，并显著减少幻觉。
+
+这得益于检索增强生成（RAG）技术。其核心在于：LLM 不再只依赖预训练的公开数据，还会将你的自定义知识作为额外的事实来源：
+
+1. （检索）处理用户提问时，系统会先从已集成的知识库中 **检索最相关的信息**。
+2. （增强）检索到的信息会与用户的原始问题打包，作为 **增强的上下文** 发送给 LLM。
+3. （生成）LLM 基于这些上下文 **生成更精准的答案**。
+
+知识存储在知识库中。你可以创建多个知识库，分别适配不同领域、场景或数据源，并按需集成到应用中。
+
+## 应用场景
+
+借助 Dify 知识库，你可以打造基于自有数据和特定领域知识的 AI 应用。常见场景包括：
+
+- **智能客服机器人**：让问答机器人基于最新的产品文档、FAQ 和故障排查指南，智能回复客户问题。
+- **企业内部知识门户**：为员工构建 AI 搜索与问答系统，快速查询公司政策与流程。
+- **内容生成工具**：根据特定背景资料，智能生成报告、文章或邮件。
+- **科研与分析应用**：检索和总结学术论文、市场报告、法律文档等专业知识，辅助研究与分析。
+
+## 创建知识库 {#set-up}
+
+- **[创建即用型知识库](/zh/self-host/use-dify/knowledge/create-knowledge/introduction)**：导入数据，再设定内容如何分段、索引和检索。
+
+- **[构建自定义知识库](/zh/self-host/use-dify/knowledge/knowledge-pipeline/readme)**：标准设置不适合你的内容时，可用知识流水线设计专属的处理流程，自行选择数据源，以及提取、分段和索引内容的每个步骤。
+
+- **[连接外部知识库](/zh/self-host/use-dify/knowledge/connect-external-knowledge-base)**：通过 API 检索你已在运行的知识库，无需把内容迁入 Dify。
+
+## 测试与改进
+
+- **[测试召回效果](/zh/self-host/use-dify/knowledge/test-retrieval)**：拿用户可能会问的问题试一试，看看会返回哪些分段。
+
+- **[调整知识库设置](/zh/self-host/use-dify/knowledge/manage-knowledge/introduction)**：更换嵌入模型、修改检索设置，或将索引方式从「经济」切换为「高质量」。
+
+- **[利用元数据增强检索](/zh/self-host/use-dify/knowledge/metadata)**：为文档标注元数据，让检索只在符合条件的文档中进行。
+
+## 使用与维护
+
+- **[集成到应用](/zh/self-host/use-dify/knowledge/integrate-knowledge-within-application)**：将知识库接入应用，并设置应用如何从中检索。
+
+- **[维护知识库内容](/zh/self-host/use-dify/knowledge/manage-knowledge/maintain-knowledge-documents)**：内容有变化时，添加、编辑、禁用或删除文档和分段。
+
+---
+
+**延伸阅读**：
+
+- [Dify v1.1.0 发布：用元数据给知识库“贴标签”，RAG 检索效率翻倍](https://mp.weixin.qq.com/s/Zvyz9tS2jmPaLo7Bi9y5LA)
+
+- [Dify v0.15.0：全新父子检索策略 - 更精准，更全面的知识检索](https://mp.weixin.qq.com/s/YCvxXVjKjIeOpTNf4NRkYQ)
+
+- [引入混合检索（Hybrid Search）和重排序（Rerank）改进 RAG 系统召回效果](https://mp.weixin.qq.com/s/57Wb0EcvgHzLO_XetTnRLg)
+
+- [文本 Embedding 基本概念和应用实现原理](https://mp.weixin.qq.com/s/sYGxvx-qsu8xaIe2gb5haQ)
+
+- [Dify.AI x Jina AI：Dify Embedding 模型新添助力 jina-embeddings-v2](https://mp.weixin.qq.com/s/k9-k1ONpRubRV4sKwuAhcg)

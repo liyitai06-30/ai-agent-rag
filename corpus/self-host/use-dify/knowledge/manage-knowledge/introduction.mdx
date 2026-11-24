@@ -1,0 +1,23 @@
+---
+title: 调整知识库设置
+sidebarTitle: 设置
+---
+
+> 本文档由 AI 自动翻译。如有任何不准确之处，请参考 [英文原版](/en/self-host/use-dify/knowledge/manage-knowledge/introduction)。
+
+<Info>
+只有工作空间所有者、管理员和编辑者可修改知识库设置。
+</Info>
+
+在知识库中，点击左侧边栏的 **设置** 图标，进入设置页。
+
+| 设置项                | 说明          |
+|:----------------------- |:---------------------|
+| 名称和图标             | 用于标识和区分知识库。|
+| 描述                  | 简要说明知识库的用途和内容。|
+| 权限                  | 定义哪些工作空间成员可访问该知识库。<Note>有权访问该知识库的成员拥有 [维护知识库内容](/zh/self-host/use-dify/knowledge/manage-knowledge/maintain-knowledge-documents) 中列出的全部权限。</Note>|
+| 索引方式               | 决定文档分段的处理和组织方式。详见 [选择索引方式](/zh/self-host/use-dify/knowledge/create-knowledge/setting-indexing-methods#选择索引方式)。|
+| 嵌入模型               | 指定嵌入模型，用于将文档分段转换为向量。<Info>更换嵌入模型会重新嵌入所有分段。</Info>|
+| 摘要自动生成           | 自动为文档分段生成摘要。<Info>启用后，仅对新添加的文档和分段生效。对于已有分段，请在文档列表中选择文档，然后点击 **生成摘要**。</Info>|
+| 检索设置               | 决定知识库如何检索相关内容。详见 [指定检索设置](/zh/self-host/use-dify/knowledge/create-knowledge/setting-indexing-methods#指定检索设置)。|
+| 文件安全扫描           | 在索引前扫描新上传的文件是否含有恶意软件。部署环境启用该功能后才会显示。设置方法和各选项详见 [扫描上传文件中的恶意软件](/zh/self-host/use-dify/knowledge/file-security-scan)。|
